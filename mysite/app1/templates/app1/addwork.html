@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>add work</title>
+</head>
+<body>
+
+    <form action="{% url 'addwork' id %}" method="post">
+        {%csrf_token%}
+            <label for="descrip">Description</label>
+            <input type="text" name="descrip">
+        <br>
+            <label for="wages">Wages</label>
+            <input type="number" name="wages">
+        <br>
+            <label for="hours">Working Hour</label>
+            <input type="number" name="hours">
+        <br>
+            <label for="Location">Location</label>
+            <input type="text" name="Location">
+
+        <button type="submit">Add</button>
+    </form>
+
+</body>
+</html>

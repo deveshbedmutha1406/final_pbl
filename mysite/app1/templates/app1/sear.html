@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <input class="form-control mb-3" type="text" placeholder="Search Work Type" aria-label="Search" id="search_here">
+    <div id="box">
+        {%for item in object_list%}
+        {{item}}<br>
+        {%endfor%}
+    </div>
+</head>
+<body>
+<script>
+
+    const data = "{{qs_json}}"
+    console.log(data)
+
+    const rdata = JSON.parse(data.replace(/&quot;/g, '"'))
+    console.log(rdata)
+
+    const input = document.getElementById('search_here')
+    console.log(input)
+
+    let filteredArr = []
+    input.addEventListener('keyup', (e)=>{
+        box.innerHTML = ''
+        filteredArr = rdata.filter(info=> info['TypeOfWork'].includes(e.target.value))
+        console.log(filteredArr)
+        if(filteredArr.length > 0){
+            filteredArr.map(info=>{
+                box.innerHTML += `${info['TypeOfWork']}<br>`
+            })
+        }else{
+            box.innerHTML = "No Result Found..."
+        }
+    })
+</script>
+</body>
+</html>

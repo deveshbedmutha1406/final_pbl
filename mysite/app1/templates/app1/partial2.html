@@ -1,0 +1,19 @@
+{%if var%}
+{% for item in var %}
+<div class="card-header">
+</div>
+<div class="card-body">
+  <h5 class="card-title">{{item.city}}</h5>
+    <h5>{{item.Description}}</h5>
+    <h5>{{item.Hours}}</h5>
+    <h5>{{item.Wages}}</h5>
+    <form action="{% url 'apply' item.id id %}" method="post">
+      {%csrf_token%}
+      <button type="submit" class="btn btn-primary">Apply</button>
+    </form>
+</div>
+{%endfor%}
+
+{%endif%}
+
+
