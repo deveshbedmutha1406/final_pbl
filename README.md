@@ -1,4 +1,4 @@
-# final_pbl
+Online Platform For Daily Wage Workers.
 This Projects aims at helping daily wage wrokers who often find difficulties in finding jobs.
 we have created website to make job search easy for Job seeker as well as For Job Giver.
 
