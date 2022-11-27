@@ -43,7 +43,7 @@
               class="align-middle mx-2 cursor-pointer font-sans font-bold border-2 rounded-3xl px-4 py-1 hover:bg-blue-200 hover:text-blue-900 transtion duration-200">Profile</a>
           </li>
         </ul>
-      
+
         <!-- <div class="flex relative items-center">
           <div class=" xl:w-80">
             <div class="input-group relative flex flex-wrap items-stretch w-full rounded">
@@ -63,18 +63,17 @@
             </div>
           </div>
         </div> -->
-      
-      
+
+
       </nav>
 
     <main>
 
         <div class="formpart flex antialiased">
-            <form class="px-4 rounded mx-24 w-full my-6 inputs space-y-6">
+            <form class="px-4 rounded mx-24 w-full my-6 inputs space-y-6" action="{%url 'update_address'%}" method="post">
                 <div>
                   <h1 class="text-4xl font-bold">My Profile</h1>
                   <p class="text-gray-600">
-                    Changes you make will be visible to other users
                   </p>
                 </div>
                 <div class="flex space-x-4">
@@ -98,19 +97,34 @@
                   </div>
                 </div>
                 <div>
-                <form action="{%url 'update_address'%}" method="post">
-                  <label for="address">Current Address</label>
-                  <input
-                    class="border border-gray-400 px-4 py-2 rounded w-full focus:outline-none focus:border-teal-400"
-                    type="text"
-                    name="address"
-                    id="address"
-                  >
-                  <button class="btn btn" type="submit">Update Address</button>
 
-                </form>
+                  {%csrf_token %}
+                  <div class="flex space-x-4">
+                    <div class="w-1/2">
+                      <label for="address">State</label>
+                      <input class="border border-gray-400 px-4 py-2 rounded w-full focus:outline-none focus:border-teal-400"
+                        type="text" name="state" id="state" placeholder="{{state}}">
 
-              
+                    </div>
+
+                    <div class="w-1/2">
+                      <label for="address">District</label>
+                      <input class="border border-gray-400 px-4 py-2 rounded w-full focus:outline-none focus:border-teal-400"
+                        type="text" name="district" id="district" placeholder="{{district}}">
+
+                    </div>
+
+                  </div>
+                  <br>
+
+                  <button class="btn btn-outline-success" type="submit">UpdateAddress</button>
+
+
+
+
+
+
+
                 </div>
                 <!-- <div>
                   <label for="budget">Budget</label>
@@ -138,22 +152,93 @@
                   </div>
                 </div> -->
               </form>
+
+
+
         </div>
 
-        <form action="{%url 'profile'%}" method="post" enctype="multipart/form-data">
+        <!-- <div class="flex justify-center">
+          <div class="my-3 w-full">
+            <label for="formFileMultiple" class="form-label inline-block mb-2 text-gray-700">Upload previous work here</label>
+            <input  class="form-control
+                              block
+                              w-full
+                              text-base
+                              font-normal
+                              text-gray-700
+                              bg-white bg-clip-padding
+                              border border-solid border-gray-300
+                              rounded
+                              transition
+                              ease-in-out
+                              m-0
+                              focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" type="file"
+              id="formFileMultiple" multiple>
+          </div>
+        </div> -->
+        <div class="flex justify-center">
+          <div class=" w-full">
+        <form class="px-4 rounded mx-24 inputs space-y-6" action="{%url 'profile'%}" method="post" enctype="multipart/form-data">
             {%csrf_token%}
-            <label for="files">Select files:</label>
-                <input type="file" id="files" name="imgs" multiple><br><br>
+                <label for="formFileMultiple" class="form-label inline-block mb-2 text-gray-700">Upload previous work here</label>
+                <input  class="form-control
+                              block
+                              w-full
+                              text-base
+                              font-normal
+                              text-gray-700
+                              bg-white bg-clip-padding
+                              border border-solid border-gray-300
+                              rounded
+                              transition
+                              ease-in-out
+                              m-0
+                              focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" type="file" id="formFileMultiple" type="file" id="files" name="imgs" multiple>
                 <button class="btn btn-outline-success" type="submit">Upload</button>
         </form>
-        {%if path%}
+          </div>
+        </div>
+
+
+        <div class="preview flex mx-32 flex-wrap">
+          {%if path%}
+          {%for item in path%}
+          <div class="images_preview flex-wrap relative border-4 border-blue-800 w-1/5 rounded-xl shadow-lg mr-14 my-9 ">
+            <img class="rounded-lg w-full h-56 object-cover" src="../media/{{item}}" width="500" height="500">
+          </div>
+          {%endfor%}
+          {%endif%}
+        </div>
+
+        <!-- {%if path%}
                 {%for item  in path%}
                     <img src="../media/{{item}}" width="500" height="500">
             {%endfor%}
-        {%endif%}
-                    <div class="card" id="cardid">
+        {%endif%} -->
+        <div class="justify-center">
+            <h2 class="mx-32 text-2xl" style="font-family:Georgia, 'Times New Roman', Times, serif">Jobs Applied</h2>
+        </div>
+
+        <div class="flex ml-10 flex-wrap" id="cardid">
+
+          {%for ele in newlist%}
+          <div class="max-w-md ml-10 py-4 px-6 bg-white shadow-lg rounded-lg my-20">
+            <div class="space-y-2">
+              <h2 class="text-gray-800 text-3xl font-semibold mb-4">City: {{ele.city}}</h2>
+              <p class="">Job Description: {{ele.Description}}</p>
+              <p>Duration: {{ele.Hours}}</p>
+              <p>Wages: {{ele.Wages}}</p>
+            </div>
+          </div>
+
+          {%endfor%}
+        </div>
+
+
+
+        <!-- <div class="card" id="cardid">
                       {%for ele in newlist%}
-                    
+
                       <div class="card-header">
                       </div>
                       <div class="card-body">
@@ -161,12 +246,12 @@
                         <h5>{{ele.Description}}</h5>
                         <h5>{{ele.Hours}}</h5>
                         <h5>{{ele.Wages}}</h5>>
-                    
+
                       </div>
                       <br>
                       {%endfor%}
-                    
-                    </div>
+
+                    </div> -->
     </main>
 
 </body>

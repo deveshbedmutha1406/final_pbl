@@ -35,6 +35,7 @@
     <title>Document</title>
 </head>
 <body>
+
     <nav class="bg-slate-800 px-4 py-4 text-white shadow-2xl relative w-full md:flex md:justify-between">
         <ul class="flex">
             <li>
@@ -62,29 +63,29 @@
                         {% include 'app1/partial.html' %}
                     </div>
             </div>
-
-
-       
-
-
-
         </div>
-                
 
 
 
 
 
-        
+
+
+
     </nav>
+            <main class="bg-cover bg-no-repeat"
+        style="background-image: url(../media/bg-image.jpg);">
+
 
 
         <div class="flex  ml-20  flex-wrap ">
-            {%for item in workss%}
+            {%for item, hindi in workss.items%}
             <div class="flex-wrap mr-10 rounded-lg shadow-lg bg-white w-1/5 my-9 relative hover: ">
                 <img class="rounded-t-lg w-full h-56 object-cover" src="../media/{{item.photo}}"/>
               <div class="p-3">
                 <h5 class="text-gray-900 text-xl font-medium mb-1 align-middle">{{item.TypeOfWork}}</h5>
+                <h5 class="text-gray-900 text-xl font-medium mb-1 align-middle">{{hindi}}</h5>
+
                 <p class="text-gray-700 text-sm mb-3">
                   work description in 2 lines.
                   mini two line it looks nice
@@ -97,6 +98,9 @@
           {%endfor%}
         </div>
 
+                </main>
+
+
 </body>
 
 </html>
@@ -105,6 +109,11 @@
 </body>
 
 <script>
+    var checkele =  document.getElementById("replaceable-content").childNodes.length;
+    if(checkele == 1){
+        var ele1 = document.getElementById("replaceable-content");
+        ele1.style.display = "none";
+    }
 
     const user_input = $("#user-input")
     const search_icon = $("#search-icon")
@@ -117,11 +126,17 @@
     let ajax_call = function (endpoint, request_parameters) {
     $.getJSON(endpoint, request_parameters)
         .done(response => {
-        console.log(response)
+
+        console.log(response["html_from_view"] == '\n\n\n');
             works_div.fadeTo('slow', 0).promise().then(() => {
                 works_div.html(response['html_from_view'])
                 works_div.fadeTo('slow', 1)
                 search_icon.removeClass('blink')
+                var checkele = document.getElementById("replaceable-content").childNodes.length;
+                if (checkele == 1) {
+                    var ele1 = document.getElementById("replaceable-content");
+                    ele1.style.display = "none";
+                }
             })
         })
 
@@ -142,6 +157,12 @@ user_input.on('keyup', function () {
 
     scheduled_function = setTimeout(ajax_call, delay_by_in_ms, endpoint, request_parameters)
 })
+
+var checkele = document.getElementById("replaceable-content").childNodes.length;
+if (checkele == 1) {
+    var ele1 = document.getElementById("replaceable-content");
+    ele1.style.display = "none";
+}
 
 </script>
 

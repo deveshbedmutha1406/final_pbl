@@ -1,35 +1,54 @@
+"""This Module Contain All The Views"""
 # for loading html pages.
 from django.shortcuts import render, redirect
-#importing all the models database tables.
+
+# importing all the models database tables.
 from .models import Applications, Work, WorkType, Images, ManyToManyRelation
-#Used Django inbuilt User Model.
+
+# Used Django inbuilt User Model.
 from django.contrib.auth.models import User
-#Used Login logout authenticate of django.
+
+# Used Login logout authenticate of django.
 from django.contrib.auth import authenticate, login, logout
+
 # login_required decorator.
 from django.contrib.auth.decorators import login_required
-#for json
 
+# for json
 from django.template.loader import render_to_string
 from django.http import JsonResponse
-from django.core.serializers import serialize # to convert django object into json.
+# to convert django object into json.
+from django.core.serializers import serialize
 
 from googletrans import Translator
 from django.views.generic import ListView
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
+import requests
+from django.db.models import Q
+
 
 # Create your views here.
 
 def update_address(request):
-    address = request.POST["address"]
-    print(address)
-
-#registration view.
-def register(request):
+    """Update Address Of User"""
     if request.method == "POST":
-        #get data from form validation remaining.
+        state = request.POST["state"]
+        district = request.POST["district"]
+        print(state)
+        var1 = Applications.objects.get(
+            user=request.user.id
+        )  # getting application from user
+        var1.users_state = state
+        var1.users_dist = district
+        var1.save()
+        return redirect("profile")
+
+
+def register(request):
+    """Registration View"""
+    if request.method == "POST":
         a = request.POST["username"]
         b = request.POST["password"]
         c = request.POST["type"]
@@ -37,253 +56,269 @@ def register(request):
         e = request.POST["contactno"]
         f = request.POST["LastName"]
 
-        p = User.objects.create_user(username=a, first_name=d, password=b, last_name=f)  #create User object first then
-        p.save()    # making User object.
+        p = User.objects.create_user(
+            username=a, first_name=d, password=b, last_name=f
+        )
+        p.save()
+        m = User.objects.get(username=a)  # retrive same user object.
+        # creating Application object.
+        obj = Applications(user=m, contact_no=e, type=c)
+        obj.save()  # User and Application is having one to one relation.
+        return redirect("login")  # data valid then go to login page.
+    return render(request, "app1/register.html")  # else return same page.
 
-        m = User.objects.get(username=a)    #retrive same user object.
 
-        obj = Applications(user=m, contact_no=e, type=c)    #creating Application object.
-        obj.save() #User and Application is having one to one relation.
-        #validations
-        return redirect("login")    #data valid then go to login page.
-    return render(request, 'app1/register.html')    #else return same page.
-
-
-#login view
-def LoginPage(request):
+def login_page(request):
+    """Login Page View"""
     if request.method == "POST":
-
         username = request.POST["username"]
         passw = request.POST["password"]
-
-        user = authenticate(request, username=username, password=passw) # check is user Exist
-        print(user)
+        user = authenticate(
+            request, username=username, password=passw
+        )  # check is user Exist
         if user is not None:
-            login(request, user)    #send login request to database.
-            return redirect('home')  # this will call home fun.
+            login(request, user)  # send login request to database.
+            return redirect("home")  # this will call home fun.
         else:
-            return render(request, 'app1/login.html', {"WA" : "Incorrect Credentials"})
-    return render(request, 'app1/login.html') # if method is not post.
+            return render(request, "app1/login.html",
+                          {"WA": "Incorrect Credentials"})
+    return render(request, "app1/login.html")  # if method is not post.
 
 
-# searching type of work ajax search.
-@login_required(login_url='login')
+@login_required(login_url="login")
 def home(request):
+    """Searching Type Of Work Ajax Search."""
     ctx = {}
-    url_parameter = request.GET.get('q')  # get the parameter which is send
-
+    url_parameter = request.GET.get("q")  # get the parameter which is send
     if url_parameter:
         # icontains search filter will be case insensitive.
         works = WorkType.objects.filter(TypeOfWork__icontains=url_parameter)
     else:
         works = ""
-
     ctx["works"] = works
-    is_ajax_request = request.headers.get("x-requested-with") == "XMLHttpRequest"
-    print(works)
+    is_ajax_request = request.headers.get(
+        "x-requested-with") == "XMLHttpRequest"
+    temp = len(works)
     if is_ajax_request:
         html = render_to_string(
-            template_name='app1/partial.html',
-            context={"works": works}
-        )
-
+            template_name="app1/partial.html",
+            context={
+                "works": works,
+                "flag": temp})
         data_dict = {"html_from_view": html}
-        
-
         return JsonResponse(data=data_dict, safe=False)
 
-    l1 = []
-    obj = WorkType.objects.all() #fetch all the WorkType objects.
-    # translation ka badme dekh lena.
-
+    obj = WorkType.objects.all()  # fetch all the WorkType objects.
     obj1 = Translator()
-    out = obj1.translate("How are you", dest="hi")
-
+    for ele in obj:
+        out = obj1.translate(ele.TypeOfWork, dest="hi")
+        print(out)
+    mydict = {}
     for item in obj:
-        l1.append(item)
-    print("no ajax")
-    return render(request, "app1/home.html", {"workss" : l1}) #passing list to html
+        out = obj1.translate(item.TypeOfWork, dest="hi")
+        mydict[item] = out.text
+    return render(request, "app1/home.html",
+                  {"workss": mydict})  # passing list to html
 
 
-@login_required(login_url='login')
+@login_required(login_url="login")
 def work(request, item_id):
-    a = Work.objects.all().filter(work_id=item_id, approved=True) # check if status is approved.
-    status = Applications.objects.get(user=request.user)    # to check user is job giver or job seeker.
-    print(status.type)
+    """location on the basis of ip of user"""
+    ip = requests.get("https://api64.ipify.org?format=json")  # to get ip.
+    # since it is in json convert it to python dict.
+    ip_data = json.loads(ip.text)
+    req = requests.get(
+        "http://ip-api.com/json/" + ip_data["ip"]
+    )  # to get location infor on the basis of ip.
+    location_data_one = req.text
+    location_data = json.loads(location_data_one)  # convert json to python.
+    # if more than 1 job available then shows according to state, city, district...
+    # else showing global result.
+    cri1 = Q(work_id=item_id)
+    cri2 = Q(approved=True)
+    cri3 = Q(city__icontains=location_data["city"])
+    # check if status is approved.
+    a = Work.objects.all().filter((cri1 & cri2) & cri3)
+    if len(a) <= 0:
+        a = Work.objects.all().filter(cri1, cri2)
+
+    status = Applications.objects.get(
+        user=request.user
+    )  # to check user is job giver or job seeker.
     flag = True
-    if status.type == 'JobSeeker':
+    if status.type == "JobSeeker":
         flag = False
-    return render(request, "app1/description.html", {"work" : a, 'id' : item_id, "flag":flag})
+    return render(request, "app1/description.html",
+                  {"work": a, "id": item_id, "flag": flag})
 
 
-# searching on the basis of city
+@login_required(login_url="login")
 def worksearch(request):
-    ctx = {}
-    url_parameter = request.GET.get('q')     # data from front end  by ajax call.
-    url_parameter2 = request.GET.get('id')
-    print(url_parameter)
-    print(url_parameter2)
-
+    """searching on the basis of city"""
+    url_parameter = request.GET.get("q")  # data from front end  by ajax call.
+    url_parameter2 = request.GET.get("id")
     # filter data
-    if url_parameter == '' or url_parameter:
-        var = Work.objects.filter(city__icontains=url_parameter, work_id=url_parameter2)     # using case insensitve filter to search object
+    if url_parameter == "" or url_parameter:
+        var = Work.objects.filter(
+            city__icontains=url_parameter, work_id=url_parameter2
+        )  # using case insensitve filter to search object
     else:
-        var = ''
-    print(var)
-    # newlist = []
-    # for ele in var:
-    #     newlist.append(ele)
-    is_ajax_request = request.headers.get("x-requested-with") == "XMLHttpRequest"
+        var = ""
+    is_ajax_request = request.headers.get(
+        "x-requested-with") == "XMLHttpRequest"
     if is_ajax_request:
 
-        html = render_to_string(    # pass ajax response.
-            template_name='app1/partial2.html',
-            context={"var": var, "id" :url_parameter2}
+        html = render_to_string(  # pass ajax response.
+            template_name="app1/partial2.html",
+            context={"var": var, "id": url_parameter2},
         )
-        # only partial2 html wala page update karna hai .
-
+        # update parital2 html page only.
         data_dict = {"html_from_view": html}
         return JsonResponse(data=data_dict, safe=False)
 
 
-# create worktype is there need to check if work is valid or not?
+@login_required(login_url="login")
 def create(request):
+    """Create worktype is there need to check if work is valid or not"""
     a = WorkType(TypeOfWork=request.POST["worktype"])
     a.save()
-    return redirect('home')
+    return redirect("home")
 
 
+@login_required(login_url="login")
 def addWork(request, pk):
+    """Add Work Functionality Support."""
     if request.method == "GET":
-        return  render(request, "app1/addwork.html", {"id" : pk})
+        return render(request, "app1/addwork.html", {"id": pk})
     else:
-        #validation remaining add only if not exist.
+        # validation remaining add only if not exist.
         var1 = request.POST["descrip"]
         var2 = request.POST["wages"]
         var3 = request.POST["hours"]
         var4 = request.POST["Location"]
-        temp = WorkType.objects.get(pk=pk) # one to many relation.
+        var5 = request.POST["state"]
+        var6 = request.POST["district"]
+        temp = WorkType.objects.get(pk=pk)  # one to many relation.
         # Create Object Of Work.
-        obj = Work(work_id=temp, Hours=var3, city=var4, Wages=var2,Description=var1)
+        obj = Work(
+            work_id=temp,
+            Hours=var3,
+            city=var4,
+            Wages=var2,
+            Description=var1,
+            state=var5,
+            district=var6,
+        )
         obj.save()
+        return redirect(
+            "work", pk, permanent=True
+        )  # permanent function is to pass args.
 
-        return redirect('work', pk, permanent=True) # permanent function is to pass args.
 
-
-@login_required(login_url='login')
+@login_required(login_url="login")
 def logout_view(request):
+    """Logout View"""
     if request.user.is_authenticated:
         logout(request)
         return render(request, "app1/login.html")
     else:
-        return redirect('login')
+        return redirect("login")
 
 
-# work remaining seprate out jobgiver and jobseeker page. refer apply view.
-@login_required(login_url='login')
+@login_required(login_url="login")
 def profile(request):
+    """Profile Page"""
     uservar = User.objects.get(id=request.user.id)
-    print(uservar.first_name)
-    # print(Applications.objects.get(user=request.user.id))
-    # works applied
-    var1 = Applications.objects.get(user=request.user.id) # getting application from user
-    var2 = ManyToManyRelation.objects.filter(userid=var1)   # then filtering out that particular user jobs applied.
+    var1 = Applications.objects.get(
+        user=request.user.id
+    )
+    state = var1.users_state
+    dist = var1.users_dist
+    var2 = ManyToManyRelation.objects.filter(
+        userid=var1
+    )
 
     newlist = []
     # passing work object for displaying just use fields of work.
     for ele in var2:
         newlist.append(Work.objects.get(pk=ele.workid.id))
 
-
-    obj1 = Applications.objects.all().filter(user=request.user) # for that User.
+    # for that User.
+    obj1 = Applications.objects.all().filter(user=request.user)
     if request.method == "POST":
-        images = request.FILES.getlist("imgs") # for multiple images.
+        images = request.FILES.getlist("imgs")  # for multiple images.
         for image1 in images:
-            #create object for each  image .
+            # create object for each  image .
             obj = Images(connect=obj1[0], image=image1).save()
         myimages = Images.objects.all().filter(connect=obj1[0])
         l1 = []
-        #fetch all images and pass as list.
+        # fetch all images and pass as list.
         for image1 in myimages:
             l1.append(image1.image)
-        return render(request, "app1/profile.html", {"obj": obj1, "path": l1, "fname" : uservar.first_name, "lname":uservar.last_name})
+        return render(
+            request,
+            "app1/profile.html",
+            {
+                "obj": obj1,
+                "path": l1,
+                "fname": uservar.first_name,
+                "lname": uservar.last_name,
+                "state": state,
+                "district": dist,
+            },
+        )
 
     myimages = Images.objects.all().filter(connect=obj1[0])
     l1 = []
     for image1 in myimages:
         l1.append(image1.image)
-    return render(request, "app1/profile.html", {"obj": obj1, "path": l1, "newlist":newlist,"fname" : uservar.first_name, "lname":uservar.last_name})
+    return render(
+        request,
+        "app1/profile.html",
+        {
+            "obj": obj1,
+            "path": l1,
+            "newlist": newlist,
+            "fname": uservar.first_name,
+            "lname": uservar.last_name,
+            "state": state,
+            "district": dist,
+        },
+    )
 
-
-class InfoListView(ListView):
-    model = WorkType
-    template_name = "app1/sear.html"
-
-    def get_context_data(self, **kwargs):
-        print("deasdsa")
-        context = super().get_context_data(**kwargs)
-        # creates json object and pass to javascript.
-        context["qs_json"] = json.dumps(list(WorkType.objects.values()))
-        return context
 
 @csrf_exempt
+@login_required(login_url="login")
 def apply(request, pk, item_id):
-    # make links to show who applied for which job.
+    """Make links to show who applied for which job"""
     if request.method == "POST":
-
         user_id = request.user
         # creating required instances using id/ primary key.
-        obj1 =  Applications.objects.get(user=user_id)
+        obj1 = Applications.objects.get(user=user_id)
         print(user_id)
         print(obj1.type)
-        a = Work.objects.all().filter(work_id=item_id, approved=True)  # check if status is approved.
+        a = Work.objects.all().filter(
+            work_id=item_id, approved=True
+        )  # check if status is approved.
 
-        if obj1.type == 'JobSeeker':
+        if obj1.type == "JobSeeker":
 
             obj2 = Work.objects.get(pk=pk)
 
-            obj = ManyToManyRelation(userid=obj1, workid=obj2)  # establish relation.
+            # establish relation.
+            obj = ManyToManyRelation(userid=obj1, workid=obj2)
             obj.save()
             # success message.
-            return render(request, "app1/description.html", {"work": a, 'id': item_id, 'message':'Applied Successfully'})
+            return render(
+                request,
+                "app1/description.html",
+                {"work": a, "id": item_id, "message": "Applied Successfully"},
+            )
         else:
-            messages.success(request, 'You Cannot apply since you are JobGiver')
-            return render(request, "app1/description.html", {"work": a, 'id': item_id})
+            messages.success(
+                request, "You Cannot apply since you are JobGiver")
+            return render(request, "app1/description.html",
+                          {"work": a, "id": item_id})
             # render page with jobgiver status cant apply.
 
-    return redirect('work', item_id, permanent=True)    # render the same page.
-
-
-#1 django.views.generic import ListView
-#2 from .models import tablename
-#3 create class InfoListView(ListView):
-
-# new search strategy
-#implemented in home
-# def search1(request):
-#     ctx = {}
-#     url_parameter = request.GET.get('q')    # get the parameter which is send
-#
-#     if url_parameter:
-#         # icontains search filter will be case insensitive.
-#         works = WorkType.objects.filter(TypeOfWork__icontains=url_parameter)
-#     else:
-#         works = WorkType.objects.all()
-#
-#     ctx["works"] = works
-#     print(ctx)
-#     is_ajax_request = request.headers.get("x-requested-with")=="XMLHttpRequest"
-#     print(is_ajax_request)
-#     if is_ajax_request:
-#         html = render_to_string(
-#             template_name='app1/partial.html',
-#             context={"works":works}
-#         )
-#         print(html)
-#
-#         data_dict = {"html_from_view":html}
-#
-#         return JsonResponse(data=data_dict, safe=False)
-#     print("ajax")
-#
-#     return render(request, "app1/search1.html", context=ctx)
+    return redirect("work", item_id, permanent=True)  # render the same page.

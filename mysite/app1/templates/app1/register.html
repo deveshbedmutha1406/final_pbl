@@ -27,10 +27,10 @@
     <title>Document</title>
     <style>
         .ScrollStyle
-{
-max-height: 2000px;
-overflow-y: scroll;
-}
+        {
+        max-height: 2000px;
+        overflow-y: scroll;
+        }
     </style>
     <!-- <link rel="stylesheet" href="style.css"> -->
     <!-- <style>
@@ -44,16 +44,31 @@ overflow-y: scroll;
     </style> -->
 </head>
 <body>
+
     <div
         class="mainbg w-full h-full bg-cover bg-no-repeat "
         style="background-image: url('https://images.pexels.com/photos/4245826/pexels-photo-4245826.jpeg');"
     >
-        <nav class="bg-black fixed w-full px-4 py-4 text-white ">
+        <!-- <nav class="bg-black fixed w-full px-4 py-4 text-white ">
             <ul class="flex">
                 <li class="mx-2 cursor-pointer font-sans font-bold hover:text-blue-500">Home</li>
                 <li class="mx-2 cursor-pointer font-sans font-bold hover:text-blue-500">Categories</li>
                 <li class="mx-2 cursor-pointer font-sans font-bold hover:text-blue-500">Contact us</li>
                 <li class="mx-2 cursor-pointer font-sans font-bold hover:text-blue-500">Developers</li>
+            </ul>
+        </nav> -->
+
+        <nav class="bg-slate-800 px-4 py-4 text-white shadow-2xl relative w-full md:flex md:justify-between">
+            <ul class="flex">
+                <li>
+                    <a href="{%url 'register'%}"
+                        class="align-middle mx-2 cursor-pointer font-sans font-bold border-2 rounded-3xl px-4 py-1 hover:bg-blue-200 hover:text-blue-900 transtion duration-200">Register</a>
+                </li>
+                <li>
+                    <a href="{% url 'login' %}"
+                        class="align-middle mx-2 cursor-pointer font-sans font-bold border-2 rounded-3xl px-4 py-1 hover:bg-blue-200 hover:text-blue-900 transtion duration-200">Login</a>
+                </li>
+
             </ul>
         </nav>
 

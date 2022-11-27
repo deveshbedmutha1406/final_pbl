@@ -78,7 +78,7 @@
 </head>
 <body>
 
-  
+
   <!-- font-family :'Times New Roman', Times, serif -->
 {%if messages%}
 {%for message in messages%}
@@ -86,15 +86,14 @@
 {%endfor%}
 {%endif%}
 
-
-<div class="card" id="cardid">
+<!-- <div class="card " id="cardid">
   {%for item in work%}
 
   <div class="card-header">
   </div>
   <div class="card-body">
     <h5 class="card-title">{{item.city}}</h5>
-        <h5>{{item.Description}}</h5>
+    <h5>{{item.Description}}</h5>
     <h5>{{item.Hours}}</h5>
     <h5>{{item.Wages}}</h5>
     <form action="{% url 'apply' item.id id %}" method="post">
@@ -105,8 +104,29 @@
   <br>
   {%endfor%}
 
+</div> -->
+
+
+
+<div class="flex ml-10 flex-wrap" id="cardid">
+  {%for item in work%}
+    <div class="max-w-md ml-10 py-4 px-6 bg-white shadow-lg rounded-lg my-20">
+    <div class="space-y-2">
+    <h2 class="text-gray-800 text-3xl font-semibold mb-4">City: {{item.city}}</h2>
+    <p class="">Job Description: {{item.Description}}</p>
+    <p>Duration: {{item.Hours}}</p>
+    <p>Wages: {{item.Wages}}</p>
+    </div>
+    <form action="{% url 'apply' item.id id %}" method="post">
+      {%csrf_token%}
+      <button type="submit" class=" btn btn-primary inline-block w-full mt-3 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out">Apply</button>
+    </form>
+
+  </div>
+
+  {%endfor%}
 </div>
- 
+
 </body>
 
 <script>
@@ -118,7 +138,7 @@
     let scheduled_function = false
 
     const endpoint = '/app1/worksearch/'
- 
+
 
 
     let ajax_call = function (endpoint, request_parameters) {
@@ -127,8 +147,8 @@
           console.log("deve");
 
         console.log(response);
-        if(response.html_from_view != "\n\n\n"){
-          let var1 = document.getElementById("cardid") 
+        if(response.html_from_view != "\n\n\n\n  \n\n"){
+          let var1 = document.getElementById("cardid")
           var1.innerHTML = response.html_from_view;
         }else{
           let var1 = document.getElementById("cardid");

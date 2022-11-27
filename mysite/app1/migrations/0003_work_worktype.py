@@ -8,28 +8,52 @@ import location_field.models.plain
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app1', '0002_remove_applications_name'),
+        ("app1", "0002_remove_applications_name"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='WorkType',
+            name="WorkType",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('TypeOfWork', models.CharField(max_length=50)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("TypeOfWork", models.CharField(max_length=50)),
             ],
         ),
         migrations.CreateModel(
-            name='Work',
+            name="Work",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('Hours', models.IntegerField(default=0)),
-                ('Description', models.CharField(max_length=200)),
-                ('Wages', models.IntegerField(default=0)),
-                ('Count', models.IntegerField(default=0)),
-                ('city', models.CharField(max_length=255)),
-                ('location', location_field.models.plain.PlainLocationField(max_length=63)),
-                ('work_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='app1.WorkType')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("Hours", models.IntegerField(default=0)),
+                ("Description", models.CharField(max_length=200)),
+                ("Wages", models.IntegerField(default=0)),
+                ("Count", models.IntegerField(default=0)),
+                ("city", models.CharField(max_length=255)),
+                (
+                    "location",
+                    location_field.models.plain.PlainLocationField(max_length=63),
+                ),
+                (
+                    "work_id",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="app1.WorkType"
+                    ),
+                ),
             ],
         ),
     ]

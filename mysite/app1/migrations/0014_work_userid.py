@@ -7,13 +7,17 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app1', '0013_worktype_photo'),
+        ("app1", "0013_worktype_photo"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='work',
-            name='userid',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='app1.Applications'),
+            model_name="work",
+            name="userid",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="app1.Applications",
+            ),
         ),
     ]

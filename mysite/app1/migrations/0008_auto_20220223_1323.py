@@ -7,20 +7,40 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app1', '0007_work_approved'),
+        ("app1", "0007_work_approved"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='applications',
-            name='image',
+            model_name="applications",
+            name="image",
         ),
         migrations.CreateModel(
-            name='Images',
+            name="Images",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('image', models.FileField(blank=True, null=True, upload_to='app1/static/imagedata')),
-                ('connect', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='app1.Applications')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "image",
+                    models.FileField(
+                        blank=True, null=True, upload_to="app1/static/imagedata"
+                    ),
+                ),
+                (
+                    "connect",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="app1.Applications",
+                    ),
+                ),
             ],
         ),
     ]
